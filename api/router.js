@@ -51,4 +51,45 @@ router.post('/auth/signup', (req,res,next) => {
 	}
 });
 
+router.get('/reviews', (req,res)=> {
+	queries.getAllSnackReviews().then(reviews => {
+		res.json(reviews);
+	});
+});
+
+router.get('/reviews/:id', (req,res) => {
+	queries.getSnackReviewById(req.params.id).then(review => {
+		res.json(review);
+	});
+});
+
+router.post('/reviews', (req, res, next) => {
+  if (valid.review(req.body)) {
+		
+    let review = {
+      title: req.body.title,
+      description: req.body.description,
+      users_id: req.body.users_id
+    };
+
+    queries.createSnackReview(review).then(result => {
+      res.json(result);
+    });
+  } else {
+    next(new Error('Title/Description cannot be empty'));
+  }
+});
+
+router.delete('/reviews/:id', function(req, res) {
+  queries.deleteSnackReviewById(req.params.id).then(response => {
+  res.json(response);
+  });
+});
+
+router.put('/reviews/:id', (req, res) => {
+	queries.updateSnackReview(req.params.id, req.body).then(response => {
+		res.json(response);
+	});
+});
+
 module.exports = router;
