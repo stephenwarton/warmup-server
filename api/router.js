@@ -63,18 +63,31 @@ router.get('/reviews/:id', (req,res) => {
 	});
 });
 
+router.get('/users/:id', (req,res) => {
+	queries.getUserById(req.params.id).then(user => {
+		res.json(user);
+	});
+});
+
 router.post('/reviews', (req, res, next) => {
   if (valid.review(req.body)) {
-		
-    let review = {
-      title: req.body.title,
-      description: req.body.description,
-      users_id: req.body.users_id
-    };
 
-    queries.createSnackReview(review).then(result => {
-      res.json(result);
-    });
+		queries.getUserById(req.body.users_id).then(user => {
+			if(user){
+				let review = {
+					title: req.body.title,
+					description: req.body.description,
+					users_id: req.body.users_id
+				};
+
+				queries.createSnackReview(review).then(result => {
+					res.json(result);
+				});
+			} else {
+				next(new Error('User does not exist'));
+			}
+		});
+
   } else {
     next(new Error('Title/Description cannot be empty'));
   }
@@ -86,10 +99,29 @@ router.delete('/reviews/:id', function(req, res) {
   });
 });
 
-router.put('/reviews/:id', (req, res) => {
-	queries.updateSnackReview(req.params.id, req.body).then(response => {
-		res.json(response);
-	});
+router.put('/reviews/:id', (req, res, next) => {
+	if (valid.review(req.body)) {
+
+		queries.getUserById(req.body.users_id).then(user => {
+			if(user){
+				let review = {
+					title: req.body.title,
+					description: req.body.description,
+					users_id: req.body.users_id
+				};
+
+				queries.updateSnackReview(req.params.id, review).then(response => {
+					res.json(response);
+				});
+			} else {
+				next(new Error('User does not exist'));
+			}
+		});
+
+  } else {
+    next(new Error('Title/Description cannot be empty'));
+  }
+
 });
 
 module.exports = router;

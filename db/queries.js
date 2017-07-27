@@ -2,6 +2,10 @@ const knex = require('./knex');
 
 module.exports = {
 
+  getUserById(id) {
+    return knex('users').where('id', id).first();
+  },
+
   getUserByEmail(email) {
     return knex('users').where('email', email).first();
   },
